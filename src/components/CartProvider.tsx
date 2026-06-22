@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
@@ -11,6 +10,7 @@ type CartItem = Product & {
 type CartContextValue = {
   items: CartItem[];
   addToCart: (product: Product) => void;
+  decreaseQuantity: (id: number) => void;
   removeFromCart: (id: number) => void;
   clearCart: () => void;
   totalItems: number;
@@ -47,6 +47,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
+  function decreaseQuantity(id: number) {
+    setItems((current) =>
+      current
+        .map((item) =>
+          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  }
+
   function removeFromCart(id: number) {
     setItems((current) => current.filter((item) => item.id !== id));
   }
@@ -65,6 +75,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return {
       items,
       addToCart,
+      decreaseQuantity,
       removeFromCart,
       clearCart,
       totalItems,

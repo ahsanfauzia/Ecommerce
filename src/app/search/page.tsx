@@ -1,5 +1,6 @@
+import type { Product } from "@prisma/client";
 import { ProductCard } from "@/components/ProductCard";
-import { products } from "@/data/products";
+import { prisma } from "@/lib/prisma";
 
 type SearchPageProps = {
   searchParams: Promise<{
@@ -10,9 +11,18 @@ type SearchPageProps = {
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q = "" } = await searchParams;
 
-  const filteredProducts = products.filter((product) => {
-    const text = `${product.name} ${product.category} ${product.description}`.toLowerCase();
-    return text.includes(q.toLowerCase());
+  const products: Product[] = await prisma.product.findMany({
+    where: {
+      OR: [
+        { name: { contains: q } },
+        { category: { contains: q } },
+        { brand: { contains: q } },
+        { description: { contains: q } },
+      ],
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   return (
@@ -20,11 +30,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <h1 className="mb-2 text-3xl font-bold">Search results</h1>
       <p className="mb-6 text-gray-600">Showing results for "{q}"</p>
 
-      {filteredProducts.length === 0 ? (
+      {products.length === 0 ? (
         <p className="text-gray-600">No products found.</p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {filteredProducts.map((product) => (
+          {products.map((product: Product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

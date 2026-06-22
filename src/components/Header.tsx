@@ -1,24 +1,58 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
-import { MapPin, Search, ShoppingCart } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import { Heart, MapPin, Search, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 
-const categories = ["Electronics", "Fashion", "Bags", "Home", "Kitchen"];
+const categories = [
+  "Electronics",
+  "Fashion",
+  "Bags",
+  "Home",
+  "Kitchen",
+  "Fitness",
+  "Beauty",
+  "Stationery",
+];
+
+type AuthUser = {
+  id: number;
+  name: string;
+  email: string;
+};
 
 export function Header() {
   const { totalItems } = useCart();
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((response) => response.json())
+      .then((data) => setUser(data.user))
+      .catch(() => setUser(null));
+  }, []);
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const trimmedQuery = query.trim();
 
-    if (!query.trim()) return;
+    if (!trimmedQuery) {
+      router.push("/products");
+      return;
+    }
 
-    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+    router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+  }
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -60,10 +94,27 @@ export function Header() {
               className="w-full px-4 py-2 text-black outline-none"
             />
 
-            <button className="bg-orange-400 px-4 text-black hover:bg-orange-500">
+            <button type="submit" className="bg-orange-400 px-4 text-black hover:bg-orange-500">
               <Search size={22} />
             </button>
           </form>
+
+          <Link href="/wishlist" className="hidden items-center gap-1 font-bold md:flex">
+            <Heart size={22} />
+            Wishlist
+          </Link>
+
+          {user ? (
+            <button onClick={logout} className="hidden text-left text-sm md:block">
+              <p className="text-gray-300">Hi, {user.name.split(" ")[0]}</p>
+              <p className="font-bold">Logout</p>
+            </button>
+          ) : (
+            <Link href="/login" className="hidden text-sm md:block">
+              <p className="text-gray-300">Hello, sign in</p>
+              <p className="font-bold">Account</p>
+            </Link>
+          )}
 
           <Link href="/cart" className="relative flex items-center gap-1 font-bold">
             <ShoppingCart size={30} />
@@ -78,13 +129,16 @@ export function Header() {
       <div className="bg-[#232f3e] text-sm text-white">
         <div className="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 py-2">
           <Link href="/" className="font-semibold">All</Link>
+          <Link href="/products">Products</Link>
           {categories.map((category) => (
             <Link key={category} href={`/category/${category.toLowerCase()}`}>
               {category}
             </Link>
           ))}
-          <span>Today's Deals</span>
-          <span>Customer Service</span>
+          <Link href="/deals">Today's Deals</Link>
+          <Link href="/wishlist">Wishlist</Link>
+          <Link href="/support">Customer Service</Link>
+          {!user && <Link href="/signup">Sign Up</Link>}
         </div>
       </div>
     </header>

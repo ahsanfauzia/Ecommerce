@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/components/CartProvider";
+import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 
 export const metadata: Metadata = {
-  title: "ShopNow",
-  description: "Simple Next.js e-commerce store",
+  title: "ShopKart",
+  description: "Full-stack Next.js e-commerce store",
 };
 
 export default function RootLayout({
@@ -18,7 +19,8 @@ export default function RootLayout({
       <body className="bg-gray-50 text-gray-950">
         <CartProvider>
           <Header />
-          {children}
+          <div className="min-h-screen">{children}</div>
+          <Footer />
         </CartProvider>
       </body>
     </html>
