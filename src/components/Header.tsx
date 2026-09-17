@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { Heart, MapPin, Search, ShoppingCart, User } from "lucide-react";
+import { Heart, MapPin, Search, ShoppingCart } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 
 const categories = [
@@ -21,6 +21,7 @@ type AuthUser = {
   id: number;
   name: string;
   email: string;
+  role: string;
 };
 
 export function Header() {
@@ -137,7 +138,10 @@ export function Header() {
           ))}
           <Link href="/deals">Today's Deals</Link>
           <Link href="/wishlist">Wishlist</Link>
+          <Link href="/orders">Orders</Link>
+          <Link href="/profile">Profile</Link>
           <Link href="/support">Customer Service</Link>
+          {user?.role === "ADMIN" && <Link href="/admin">Admin</Link>}
           {!user && <Link href="/signup">Sign Up</Link>}
         </div>
       </div>

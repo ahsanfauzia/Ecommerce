@@ -1,8 +1,8 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 
-const SESSION_COOKIE = "shopkart_session";
+export const SESSION_COOKIE = "shopkart_session";
 const SESSION_DAYS = 7;
 
 export function hashPassword(password: string) {
@@ -48,36 +48,7 @@ export async function getCurrentUser() {
   return session.user;
 }
 
-export function setSessionCookie(response: Response, token: string, expiresAt: Date) {
-  const nextResponse = response as Response & {
-    cookies?: {
-      set: (name: string, value: string, options: Record<string, unknown>) => void;
-    };
-  };
-
-  nextResponse.cookies?.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    expires: expiresAt,
-    path: "/",
-  });
+export async function requireAdmin() {
+  const user = await getCurrentUser();
+  return user?.role === "ADMIN" ? user : null;
 }
-
-export function clearSessionCookie(response: Response) {
-  const nextResponse = response as Response & {
-    cookies?: {
-      set: (name: string, value: string, options: Record<string, unknown>) => void;
-    };
-  };
-
-  nextResponse.cookies?.set(SESSION_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    expires: new Date(0),
-    path: "/",
-  });
-}
-
-export { SESSION_COOKIE };

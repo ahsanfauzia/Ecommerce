@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSessionToken, getSessionExpiry, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     },
   });
 
-  const response = NextResponse.json({ user: { id: user.id, name: user.name, email: user.email } });
+  const response = NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   response.cookies.set("shopkart_session", token, {
     httpOnly: true,
     sameSite: "lax",
@@ -53,3 +53,4 @@ export async function POST(request: Request) {
 
   return response;
 }
+
